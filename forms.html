@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Professional Contact Form</title>
+  <style>
+    body {
+      background: #f4f7f8;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .form-container {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+      font-weight: 500;
+      color: #555;
+    }
+
+    input[type="text"],
+    input[type="email"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus {
+      border-color: #007bff;
+    }
+
+    .options {
+      margin-top: 10px;
+    }
+
+    .options input {
+      margin-right: 8px;
+    }
+
+    .error {
+      color: red;
+      font-size: 0.85em;
+      margin-top: 5px;
+    }
+
+    button {
+      margin-top: 25px;
+      padding: 12px;
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h2>📇 Contact Form</h2>
+
+    <form id="contactForm">
+      <label>First Name:
+        <input type="text" id="firstName" />
+        <div class="error" id="firstNameError"></div>
+      </label>
+
+      <label>Last Name:
+        <input type="text" id="lastName" />
+        <div class="error" id="lastNameError"></div>
+      </label>
+
+      <label>Email:
+        <input type="email" id="email" />
+        <div class="error" id="emailError"></div>
+      </label>
+
+      <label>Mobile Number:
+        <input type="text" id="mobile" maxlength="10" />
+        <div class="error" id="mobileError"></div>
+      </label>
+
+      <label>Gender:
+        <div class="options">
+          <input type="radio" name="gender" value="Male" /> Male
+          <input type="radio" name="gender" value="Female" /> Female
+        </div>
+        <div class="error" id="genderError"></div>
+      </label>
+
+      <label>Hobbies:
+        <div class="options">
+          <input type="checkbox" name="hobbies" value="Reading" /> Reading
+          <input type="checkbox" name="hobbies" value="Gaming" /> Gaming
+          <input type="checkbox" name="hobbies" value="Traveling" /> Traveling
+          <input type="checkbox" name="hobbies" value="Music" /> Music
+        </div>
+        <div class="error" id="hobbiesError"></div>
+      </label>
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <script>
+  document.getElementById("contactForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+    let isValid = true;
+    document.querySelectorAll(".error").forEach(el => el.textContent = "");
+
+    const firstName = document.getElementById("firstName").value.trim();
+    const lastName = document.getElementById("lastName").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const mobile = document.getElementById("mobile").value.trim();
+    const genderChecked = document.querySelector('input[name="gender"]:checked');
+    const hobbiesChecked = document.querySelectorAll('input[name="hobbies"]:checked');
+
+    // Validations
+    if (firstName === "") {
+      document.getElementById("firstNameError").textContent = "First name is required";
+      isValid = false;
+    }
+    if (lastName === "") {
+      document.getElementById("lastNameError").textContent = "Last name is required";
+      isValid = false;
+    }
+    if (!/^[^ ]+@[^ ]+\.[a-z]{2,3}$/.test(email)) {
+      document.getElementById("emailError").textContent = "Invalid email format";
+      isValid = false;
+    }
+    if (!/^\d{10}$/.test(mobile)) {
+      document.getElementById("mobileError").textContent = "Mobile must be 10 digits";
+      isValid = false;
+    }
+    if (!genderChecked) {
+      document.getElementById("genderError").textContent = "Select your gender";
+      isValid = false;
+    }
+    if (hobbiesChecked.length === 0) {
+      document.getElementById("hobbiesError").textContent = "Select at least one hobby";
+      isValid = false;
+    }
+
+    if (isValid) {
+      const formData = {
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        mobile: mobile,
+        gender: genderChecked.value,
+        hobbies: Array.from(hobbiesChecked).map(cb => cb.value)
+      };
+
+      fetch("http://localhost:5000/api/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert("✅ Data saved to database: " + data.message);
+        document.getElementById("contactForm").reset();
+      })
+      .catch(error => {
+        alert("❌ Error sending data");
+        console.error(error);
+      });
+    }
+  });
+</script>
+
+
+</body>
+</html>
